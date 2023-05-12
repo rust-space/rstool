@@ -1,6 +1,9 @@
+pub mod time;
+
 use ansi_term::Color;
-use chrono::{Local, NaiveDateTime, TimeZone, Utc};
 use clap::{App, Arg, SubCommand};
+
+use crate::time::TimeTool;
 
 fn main() {
     let matches = App::new("rstool")
@@ -51,36 +54,22 @@ fn main() {
         )
         .get_matches();
     if let Some(matches) = matches.subcommand_matches("time") {
+        let tt = TimeTool::new();
         let std = matches.value_of("std").unwrap();
 
         if matches.is_present("convert") {
             if matches.is_present("datetime") {
-                let input = matches.value_of("datetime").unwrap();
-                let datetime = NaiveDateTime::parse_from_str(input, "%Y-%m-%d %H:%M:%S").unwrap();
-                println!("{}", datetime.timestamp())
+                let datetime = matches.value_of("datetime").unwrap();
+                println!("{}", tt.str2timestamp(datetime));
             } else {
-                let input = matches.value_of("timestamp").unwrap_or_default();
-                let timestamp = if input.is_empty() {
-                    Utc::now().timestamp()
-                } else {
-                    input.parse::<i64>().unwrap()
-                };
-                let datetime = Utc.timestamp_opt(timestamp, 0).unwrap();
-                match std {
-                    "timestamp" => println!("{}", datetime.timestamp()),
-                    "rfc2822" => println!("{}", datetime.to_rfc2822()),
-                    "rfc3339" => println!("{}", datetime.to_rfc3339()),
-                    _ => println!("{}", datetime.format("%Y-%m-%d %H:%M:%S").to_string()),
-                }
+                let timestamp = matches.value_of("timestamp").unwrap_or_default();
+                let ts = tt
+                    .timestamp2string(timestamp, std)
+                    .expect("error: unable to parse <timestamp> as a i64");
+                println!("{}", ts);
             }
         } else {
-            let now = Local::now();
-            match std {
-                "timestamp" => println!("{}", now.timestamp()),
-                "rfc2822" => println!("{}", now.to_rfc2822()),
-                "rfc3339" => println!("{}", now.to_rfc3339()),
-                _ => println!("{}", now.format("%Y-%m-%d %H:%M:%S").to_string()),
-            }
+            println!("{}", tt.now2string(std));
         }
     } else {
         let linux_logo = r#"
