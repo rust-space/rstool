@@ -1,0 +1,58 @@
+name: rstool
+version: "0.0.1"
+author: Jin Peng <554085731@qq.com>
+about: A CLI toolkit
+subcommands:
+  - time:
+      about: time toolkit
+      args:
+        - now:
+            short: n
+            long: now
+            help: output current time
+            conflicts_with: convert
+        - convert:
+            short: c
+            long: convert
+            help: convert time format
+            conflicts_with: now
+        - timestamp:
+            short: t
+            long: timestamp
+            help: convert timestamp to datetime
+            conflicts_with: datetime
+            takes_value: true
+        - datetime:
+            short: d
+            long: datetime
+            help: convert datetime to timestamp
+            conflicts_with: timestamp
+            takes_value: true
+        - std:
+            short: s
+            long: standard
+            possible_values:
+              - rfc2822
+              - rfc3339
+              - timestamp
+              - usual
+            default_value: usual
+  - ip:
+      about: ip toolkit
+      args:
+        - local:
+            short: l
+            long: local
+            help: output local IP addr
+            conflicts_with: public
+        - public:
+            short: p
+            long: public
+            help: output public IP addr
+            conflicts_with: local
+        - resolve:
+            short: r
+            long: resolve
+            help: resolve domain to IP addr
+            takes_value: true
+            value_name: domain

@@ -6,6 +6,11 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-clap = "3.2"
-chrono = "0.4"
-ansi_term = "0.12.1"
+clap = { version = "~3.2", features = ["yaml"] }
+chrono = "~0.4"
+ansi_term = "~0.12"
+reqwest = { version = "~0.11", features = ["blocking", "json"] }
+regex = "~1.6"
+trust-dns = { version = "~0.17", default-features = false }
+url = "~2"
+rand = "~0.8"
