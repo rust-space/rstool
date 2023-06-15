@@ -1,6 +1,6 @@
 # rstool
 
-A CLI toolkit devloped in Rust. This is my personal training project, more features are developing.
+A CLI toolkit implemented in  Rust. This is my personal training project, more features are developing.
 
 ## Install
 

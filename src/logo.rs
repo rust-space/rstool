@@ -1,3 +1,5 @@
+//! 命令行logo模块
+
 use ansi_term::Color;
 
 pub fn output() {
@@ -5,7 +7,7 @@ pub fn output() {
     println!("{}", logo);
 }
 
-fn generate () -> String {
+fn generate() -> String {
     let logo = r#"
           _              _ 
          | |            | |
@@ -14,13 +16,13 @@ fn generate () -> String {
 | |  \__ \ || (_) | (_) | |
 |_|  |___/\__\___/ \___/|_|                          
     "#;
-        let green = Color::Green.bold();
-        let yellow = Color::Yellow.bold();
-        let blue = Color::Blue.bold();
-         format!(
-            "{}{}{}",
-            green.paint(logo),
-            yellow.paint("    Welcome to use rstool!"),
+    let green = Color::Green.bold();
+    let yellow = Color::Yellow.bold();
+    let blue = Color::Blue.bold();
+    format!(
+        "{}{}{}",
+        green.paint(logo),
+        yellow.paint("    Welcome to use rstool!"),
         blue.paint("\n\n")
-        )
+    )
 }

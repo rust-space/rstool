@@ -1,21 +1,27 @@
+//! ip 处理库
+
 use std::net::{IpAddr, SocketAddr, UdpSocket};
 use std::time::Duration;
 
 use regex::Regex;
 
-use trust_dns::op::{Message, MessageType, OpCode, Query};
-use trust_dns::proto::error::ProtoError;
-use trust_dns::rr::domain::Name;
-use trust_dns::rr::record_type::RecordType;
-use trust_dns::serialize::binary::*;
+use trust_dns_client::op::{Message, MessageType, OpCode, Query};
+use trust_dns_client::proto::error::ProtoError;
+use trust_dns_client::rr::domain::Name;
+use trust_dns_client::rr::record_type::RecordType;
+use trust_dns_client::serialize::binary::*;
 
+/// DNS服务器
 const DNS_SERVER: &'static str = "114.114.114.114:53";
+/// ip地址查询服务器
 const IP_SERVER: &'static str = "https://myip.ipip.net";
 
+/// ip 处理相关错误
 #[derive(Debug)]
 pub enum IpError {
     Request(reqwest::Error),
     RegexIpAddr,
+    Regex(regex::Error),
     ParseDomainName(ProtoError),
     ParseDnsServerAddress(std::net::AddrParseError),
     Encoding(ProtoError),
@@ -43,6 +49,12 @@ impl From<std::net::AddrParseError> for IpError {
     }
 }
 
+impl From<regex::Error> for IpError {
+    fn from(error: regex::Error) -> Self {
+        IpError::Regex(error)
+    }
+}
+
 impl std::error::Error for IpError {}
 
 pub fn get_local_ip() -> Result<IpAddr, IpError> {
@@ -55,11 +67,18 @@ pub fn get_local_ip() -> Result<IpAddr, IpError> {
     }
 }
 
+/// 查询公网ip
+/// # Errors
+/// 
+/// 在以下情形下会产生错误:
+///
+/// - 请求错误（reqwest::Error）,
+/// - 文本编码转换错误,
+/// - 正则匹配错误.
 pub fn get_public_ip() -> Result<String, IpError> {
     let body = reqwest::blocking::get(self::IP_SERVER)?.text()?;
 
-    let re = Regex::new(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}").unwrap();
-    if let Some(ip) = re.find(body.as_str()) {
+    if let Some(ip) = Regex::new(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}")?.find(body.as_str()) {
         Ok(ip.as_str().to_owned())
     } else {
         Err(IpError::RegexIpAddr)
@@ -113,8 +132,8 @@ pub fn resolve(domain_name: &str) -> Result<Option<std::net::IpAddr>, Box<dyn st
 
     for answer in response.answers() {
         if answer.record_type() == RecordType::A {
-            let resource = answer.rdata();
-            let server_ip = resource.to_ip_addr().expect("invalid IP address received");
+            let resource = answer.data();
+            let server_ip = resource.unwrap().to_ip_addr().expect("invalid IP address received");
             return Ok(Some(server_ip));
         }
     }
